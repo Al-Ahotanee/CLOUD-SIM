@@ -465,6 +465,9 @@ def get_allocations():
 @app.route("/", defaults={"path":""})
 @app.route("/<path:path>")
 def serve_spa(path):
+    # Never intercept API routes - return 404 JSON instead of serving HTML
+    if path.startswith("api/"):
+        return jsonify({"ok": False, "msg": "Not found"}), 404
     full = os.path.join(app.static_folder, path)
     if path and os.path.exists(full):
         return send_from_directory(app.static_folder, path)
@@ -472,9 +475,11 @@ def serve_spa(path):
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ENTRY POINT
+# init_db() is called at module level so gunicorn picks it up on import.
 # ─────────────────────────────────────────────────────────────────────────────
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     port  = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_ENV") == "development"
     app.run(host="0.0.0.0", port=port, debug=debug)
