@@ -1,0 +1,19 @@
+# render.yaml — One-click deploy config for Render.com
+# Commit this to your GitHub repo root alongside app.py
+
+services:
+  - type: web
+    name: cloudsim
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        value: /tmp/cloud.db   # Change to /data/cloud.db if you add a Render Disk
+    # Optional: uncomment to add a persistent disk (free tier doesn't support this)
+    # disk:
+    #   name: cloudsim-data
+    #   mountPath: /data
+    #   sizeGB: 1
